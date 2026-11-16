@@ -1,6 +1,6 @@
 import { Router } from 'express'
 
-export const router = Router()
+const router = Router()
 
 router.get('/', (req, res) => {
   res.send({ message: 'Habits' })
@@ -22,3 +22,5 @@ router.post('/:id/complete', (req, res) => {
   const habitId = req.params.id
   res.status(201).send({ message: `Completed Habit ${habitId}` })
 })
+
+export default router

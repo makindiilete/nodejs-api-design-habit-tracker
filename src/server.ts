@@ -1,4 +1,7 @@
 import express from 'express'
+import authRoutes from './routes/authRoutes.ts'
+import habitRoutes from './routes/habitRoutes.ts'
+import userRoutes from './routes/userRoutes.ts'
 
 export const app = express()
 
@@ -10,10 +13,6 @@ app.get('/health', (req, res) => {
   res.send({ message: 'Hello' }) //will do the same thing as line 9. 200 OK attached by default
 })
 
-app.post('/cake', (req, res) => {
-  res.send('next') // returns 'next'
-})
-
-app.post('/cake/:flavor/:id', (req, res) => {
-  res.send(req.params) // req.params contains all parameter passed in the request
-})
+app.use('/api/users', userRoutes)
+app.use('/api/habits', habitRoutes)
+app.use('/api/auth', authRoutes)

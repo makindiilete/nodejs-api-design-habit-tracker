@@ -1,6 +1,6 @@
 import { Router } from 'express'
 
-export const router = Router()
+const router = Router()
 
 router.get('/', (req, res) => {
   res.send({ message: 'Users' })
@@ -21,3 +21,5 @@ router.delete('/:id', (req, res) => {
   const userId = req.params.id
   res.status(204).send(`Deleted user with id ${userId}`)
 })
+
+export default router
