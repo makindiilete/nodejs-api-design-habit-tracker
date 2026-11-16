@@ -11,3 +11,16 @@
 // res.json({ message: 'hi' }); // application/json (same)
 // res.send('hello');           // text/html
 // res.json('hello');           // application/json -> "hello"
+
+// ---------------------------------------------------------------
+// Handler vs Router
+// ---------------------------------------------------------------
+// - Router (app.get / router.get): matches the method + path and
+//   decides WHICH function runs.
+// - Handler: the callback (req, res) => {} that runs for that route.
+//   It does the work and SENDS the response with res.json()/res.send().
+//   Express ignores the function's return value.
+
+// router.get('/habits', (req, res) => {   // router: GET /habits
+//   res.json({ habits: [] });             // handler: everything in here
+// });
