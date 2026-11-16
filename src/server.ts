@@ -9,3 +9,11 @@ app.get('/health', (req, res) => {
   // res.json({message: 'Hello'}).status(200)
   res.send({ message: 'Hello' }) //will do the same thing as line 9. 200 OK attached by default
 })
+
+app.post('/cake', (req, res) => {
+  res.send('next') // returns 'next'
+})
+
+app.post('/cake/:flavor/:id', (req, res) => {
+  res.send(req.params) // req.params contains all parameter passed in the request
+})
