@@ -47,7 +47,7 @@ export const validateBody = (schema: ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       const validatedData = schema.parse(req.body) // check it
-      req.body = validatedData                     // keep the clean copy
+      req.body = validatedData                     // swap raw body for the clean copy
       next()                                       // you may pass
     } catch (e) {
       if (e instanceof ZodError) {
@@ -79,16 +79,56 @@ Alternative: `schema.safeParse(data)` **never throws**. It returns:
 
 ### Why `req.body = validatedData`?
 
-So the handler gets the **cleaned** data, not whatever the client sent.
+**The key fact:** `schema.parse(req.body)` does **not** change `req.body`. It hands you back a **brand-new, cleaned-up copy**, and the original stays exactly as the client sent it.
 
-```json
-// client sends
-{ "name": "Read", "age": 3, "isAdmin": true }
-// handler receives
-{ "name": "Read", "age": 3 }
+So if you validate but don't swap it in, your handler still reads the **original, uncleaned** body.
+
+**Analogy:** you hand a messy form to the security desk. They check it, then write a **neat copy** with the junk crossed out and the mistakes fixed. If they keep the neat copy in their drawer and pass your **messy original** to the account officer, what was the point of the cleaning? `req.body = validatedData` is the desk **swapping the messy form for the neat one** before passing it on.
+
+#### See it happen
+
+Schema:
+
+```ts
+const createHabitSchema = z.object({
+  name: z.string().trim(),           // remove spaces at the ends
+  age: z.coerce.number(),            // turn "3" into 3
+  isActive: z.boolean().default(true), // fill in if missing
+})
 ```
 
-This protects against **mass assignment**, where a client sneaks in fields like `isAdmin` that they shouldn't control.
+Client sends:
+
+```json
+{ "name": "  Read  ", "age": "3", "userId": "someone-elses-id" }
+```
+
+What each one holds after `parse` (real output):
+
+```js
+req.body      // { name: '  Read  ', age: '3', userId: 'someone-elses-id' }  ← untouched
+validatedData // { name: 'Read', age: 3, isActive: true }                    ← cleaned
+req.body === validatedData // false: two different objects
+```
+
+#### What goes wrong if you skip the swap
+
+Your handler saves the body to the database:
+
+```ts
+await db.insert(habits).values(req.body)
+```
+
+| Without the swap, `req.body` has… | Result |
+| --- | --- |
+| `userId: 'someone-elses-id'` | The habit is saved under **another user's account**. This is called **mass assignment**: the client sets fields it should never control (`userId`, `isAdmin`, `balance`). |
+| `age: '3'` (a string) | The database gets the wrong type, or your maths breaks (`'3' + 1 === '31'`) |
+| `name: '  Read  '` | Messy data saved with extra spaces |
+| no `isActive` | The default you defined never gets applied |
+
+With the swap, the handler only ever sees `{ name: 'Read', age: 3, isActive: true }`.
+
+**One-liner for interviews:** *"`parse` returns a new, cleaned object. Reassigning it to `req.body` makes sure every handler downstream works with the trusted version (stripped, converted and defaulted), not the raw client input."*
 
 ## `err.path`: the directions to the bad field
 

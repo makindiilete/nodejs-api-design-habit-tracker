@@ -2,76 +2,72 @@ import type { Request, Response, NextFunction } from 'express'
 import { ZodError, type ZodSchema } from 'zod'
 
 /**
- * validateBody — a middleware FACTORY.
+ * Builds a middleware that validates `req.body` against a Zod schema.
+ * Valid → replaces `req.body` with the clean data and calls `next()`.
+ * Invalid → responds 400 with `{ field, message }` for each issue.
  *
- * Analogy: a security desk at a bank. You hand it a checklist (the Zod schema)
- * and it gives you back a guard who checks every form (req.body) before the
- * customer reaches the account officer (your route handler).
- *
- * It does not validate anything itself — it RETURNS a middleware that does.
- * That lets one function serve every route:
- *   router.post('/', validateBody(createHabitSchema), handler)
- *   router.patch('/:id', validateBody(updateHabitSchema), handler)
- *
- * Flow:
- *   request → guard (this middleware) → pass?  → next() → route handler
- *                                     → fail?  → 400 JSON, handler never runs
- *
- * @param schema - The Zod schema (checklist) the body must match.
- *                 NOTE: `ZodSchema` is deprecated in Zod v4 (hence the
- *                 strikethrough in the editor). Modern form: `z.ZodType`.
- * @returns An Express middleware `(req, res, next) => void`.
- *
- * @example
- * // Body sent: { "name": "Read", "owner": { "address": { "city": 123 } } }
- * // Response (400):
- * // {
- * //   "error": "Validation failed",
- * //   "details": [
- * //     { "field": "owner.address.city",
- * //       "message": "Invalid input: expected string, received number" }
- * //   ]
- * // }
+ * @see docs/04-validation-middleware-zod.md
  */
 export const validateBody = (schema: ZodSchema) => {
-  // This inner function is the actual guard Express calls for each request.
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      // parse() checks req.body against the checklist.
-      // ✅ Valid   → returns a CLEAN copy (unknown extra keys are stripped).
-      // ❌ Invalid → THROWS a ZodError, so we jump to the catch block.
+      // parse() doesn't touch req.body. It returns a NEW cleaned object
+      // (extra keys removed, types converted, defaults added), or throws ZodError.
       const validatedData = schema.parse(req.body)
-
-      // Swap the raw body for the clean one, so the handler only ever
-      // sees data that matches the schema.
+      // Swap it in, or the handler still reads the raw, untrusted client input.
       req.body = validatedData
-
-      // "You may pass" — hand over to the next function in the route chain.
       next()
     } catch (e) {
       if (e instanceof ZodError) {
-        // 400 = Bad Request: the CLIENT sent something wrong.
-        // `return` stops here so we don't also call next().
         return res.status(400).json({
           error: 'Validation failed',
-          // e.issues = Zod's list of every problem it found (not just the first).
           details: e.issues.map((err) => ({
-            // err.path = the DIRECTIONS to the bad field, from the top of the body.
-            //   { name: 5 }                          → ['name']                  → "name"
-            //   { owner: { address: { city: 1 } } }  → ['owner','address','city'] → "owner.address.city"
-            //   { habits: [ {...}, { name: 42 } ] }  → ['habits', 1, 'name']     → "habits.1.name"
-            // .join('.') turns the list into one readable label that a
-            // frontend form can use to show the error under the right input.
-            field: err.path.join('.'),
+            field: err.path.join('.'), // ['owner', 'city'] → "owner.city"
             message: err.message,
           })),
         })
       }
+      next(e) // next(e) so real errors reach the error handler
+    }
+  }
+}
 
-      // Not a validation error (i.e. something unexpected broke).
-      // ⚠️ TODO: should be `next(e)` — plain next() lets the request carry on
-      // as if nothing went wrong. next(e) sends it to Express's error handler.
+export const validateParams = (schema: ZodSchema) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    try {
+      schema.parse(req.params) // throws ZodError if invalid
       next()
+    } catch (e) {
+      if (e instanceof ZodError) {
+        return res.status(400).json({
+          error: 'Invalid Params',
+          details: e.issues.map((err) => ({
+            field: err.path.join('.'), // ['owner', 'city'] → "owner.city"
+            message: err.message,
+          })),
+        })
+      }
+      next(e) // next(e) so real errors reach the error handler
+    }
+  }
+}
+
+export const validateQuery = (schema: ZodSchema) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    try {
+      schema.parse(req.query) // throws ZodError if invalid
+      next()
+    } catch (e) {
+      if (e instanceof ZodError) {
+        return res.status(400).json({
+          error: 'Invalid Query',
+          details: e.issues.map((err) => ({
+            field: err.path.join('.'), // ['owner', 'city'] → "owner.city"
+            message: err.message,
+          })),
+        })
+      }
+      next(e) // next(e) so real errors reach the error handler
     }
   }
 }
