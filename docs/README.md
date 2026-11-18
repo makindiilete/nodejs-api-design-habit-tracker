@@ -12,5 +12,7 @@ Notes from the API Design in Node.js course, written to be interview-ready.
 | 06 | [Route Params vs Query Params](./06-route-params-vs-query-params.md) |
 | 07 | [Relational Databases](./07-relational-databases.md) |
 | 08 | [Database Relationships](./database_relationship.md) |
+| 09 | [ORMs and Entity Framework](./09-orms-and-entity-framework.md) |
+| 10 | [Reading ER Diagrams & dbdiagram.io](./10-reading-er-diagrams-and-dbdiagram.md) |
 
 New notes go in this folder as `NN-topic-name.md`, and get a row in the table above.
