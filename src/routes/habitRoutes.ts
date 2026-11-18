@@ -13,7 +13,7 @@ const completeHabitParamsSchema = z.object({
 })
 
 router.get('/', (req, res) => {
-  res.send({ message: 'Habits' })
+  res.json({ message: 'Habits' })
 })
 
 router.get('/:id', (req, res) => {
