@@ -11,8 +11,8 @@ Click [here](https://api-design-with-node-v5.super.site/) to view the course not
 
 ```bash
 # Node.js 23.6.0 or higher is required for this project
-git clone https://github.com/Hendrixer/api-design-node-v5.git
-cd api-design-node-v5
+git clone https://github.com/makindiilete/nodejs-api-design-habit-tracker.git
+cd nodejs-api-design-habit-tracker
 npm i
 ```
 
