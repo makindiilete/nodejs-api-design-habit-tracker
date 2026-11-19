@@ -13,6 +13,10 @@ Notes from the API Design in Node.js course, written to be interview-ready.
 | 07 | [Relational Databases](./07-relational-databases.md) |
 | 08 | [Database Relationships](./database_relationship.md) |
 | 09 | [ORMs and Entity Framework](./09-orms-and-entity-framework.md) |
-| 10 | [Reading ER Diagrams & dbdiagram.io](./10-reading-er-diagrams-and-dbdiagram.md) |
+| 10 | [Reading ER Diagrams](./10-reading-er-diagrams.md) |
+| 11 | [PostgreSQL Data Types](./11-postgres-data-types.md) |
+| 12 | [Designing Schemas with dbdiagram.io](./12-designing-schemas-with-dbdiagram.md) |
+| 13 | [Drizzle `relations()` from an ER Diagram](./13-drizzle-relations-from-diagrams.md) |
+| 14 | [Prisma: Schema & Relations](./14-prisma-schema-and-relations.md) |
 
 New notes go in this folder as `NN-topic-name.md`, and get a row in the table above.
