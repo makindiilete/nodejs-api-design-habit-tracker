@@ -18,5 +18,6 @@ Notes from the API Design in Node.js course, written to be interview-ready.
 | 12 | [Designing Schemas with dbdiagram.io](./12-designing-schemas-with-dbdiagram.md) |
 | 13 | [Drizzle `relations()` from an ER Diagram](./13-drizzle-relations-from-diagrams.md) |
 | 14 | [Prisma: Schema & Relations](./14-prisma-schema-and-relations.md) |
+| 15 | [Connection Pooling: Mongoose vs Postgres](./15-connection-pooling.md) |
 
 New notes go in this folder as `NN-topic-name.md`, and get a row in the table above.
