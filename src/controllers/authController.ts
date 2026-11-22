@@ -35,7 +35,7 @@ export const register = async (
         lastName: users.lastName,
         createdAt: users.createdAt,
       })
-    const token = generateToken({
+    const token = await generateToken({
       id: user.id,
       email: user.email,
       username: user.username,
