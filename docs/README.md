@@ -20,5 +20,6 @@ Notes from the API Design in Node.js course, written to be interview-ready.
 | 14 | [Prisma: Schema & Relations](./14-prisma-schema-and-relations.md) |
 | 15 | [Connection Pooling: Mongoose vs Postgres](./15-connection-pooling.md) |
 | 16 | [Cookies & Session-Based Authentication](./16-cookies-and-sessions.md) |
+| 17 | [Anatomy of a bcrypt Password Hash](./17-bcrypt-password-hashes.md) |
 
 New notes go in this folder as `NN-topic-name.md`, and get a row in the table above.
