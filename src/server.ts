@@ -6,6 +6,7 @@ import helmet from 'helmet'
 import cors from 'cors'
 import morgan from 'morgan'
 import { isTest } from '../env.ts'
+import { authenticateToken } from './middleware/auth.ts'
 
 export const app = express()
 
@@ -108,6 +109,9 @@ app.get('/health', (req, res) => {
   res.send({ message: 'Hello' }) //will do the same thing as line 9. 200 OK attached by default
 })
 
+app.use('/api/auth', authRoutes)
+// Use our auth middleware to turn all routes under this to a protected routes...
+// We cannot add it ontop of auth routes bcos Signup and Login sud not be protected
+app.use(authenticateToken)
 app.use('/api/users', userRoutes)
 app.use('/api/habits', habitRoutes)
-app.use('/api/auth', authRoutes)
