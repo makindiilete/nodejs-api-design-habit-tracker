@@ -50,10 +50,27 @@ export const register = async (
   }
 }
 
+/**
+ * POST handler: signs an existing user in and returns a fresh JWT.
+ *
+ * Steps:
+ * - `db.select().from(users)` — Drizzle: start a `SELECT * FROM users` query.
+ * - `.where(eq(users.email, email))` — `eq` builds `WHERE email = $1` (parameterised, so
+ *   no SQL injection). Resolves to an array, hence `const [user]`.
+ * - {@link comparePassword} — bcrypt-checks the given password against the stored hash.
+ * - Unknown email and wrong password both return the same 401 `Invalid credentials`, so
+ *   attackers can't tell which emails are registered.
+ * - {@link generateToken} — signs a JWT with the user's id, email and username.
+ *
+ * @param {Request} req - Body is `{ email, password }`, already checked by `loginSchema`.
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} Sends 200 `{ message, user, token }` (no password), 401 `{ message }`
+ *   on bad credentials, or 500 `{ message, error }` on failure.
+ */
 export const login = async (
   req: Request<any, any, { email: string; password: string }>,
   res: Response,
-) => {
+): Promise<Response<any, Record<string, any>>> => {
   try {
     // find user by email in the db
     const [user] = await db
