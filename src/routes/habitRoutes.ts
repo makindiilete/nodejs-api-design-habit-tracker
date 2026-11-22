@@ -15,8 +15,6 @@ const router = Router()
  * - No token or a bad token → 401/403 before any habit handler runs.
  * - Valid token → `req.user` is set and the request moves on to the route.
  */
-router.use(authenticateToken)
-
 const createHabitSchema = z.object({
   name: z.string(),
 })
