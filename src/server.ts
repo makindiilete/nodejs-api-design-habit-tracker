@@ -112,6 +112,6 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes)
 // Use our auth middleware to turn all routes under this to a protected routes...
 // We cannot add it ontop of auth routes bcos Signup and Login sud not be protected
-app.use(authenticateToken)
+// app.use(authenticateToken)
 app.use('/api/users', userRoutes)
 app.use('/api/habits', habitRoutes)
