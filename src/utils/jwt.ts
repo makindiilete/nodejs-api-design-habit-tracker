@@ -1,4 +1,4 @@
-import { SignJWT } from 'jose'
+import { jwtVerify, SignJWT } from 'jose'
 import { createSecretKey } from 'crypto'
 import env from '../../env.ts'
 
@@ -31,4 +31,15 @@ export const generateToken = (payload: JwtPayload): Promise<string> => {
     .setIssuedAt()
     .setExpirationTime(env.JWT_EXPIRES_IN)
     .sign(secretKey)
+}
+
+export const verifyToken = async (token: string) => {
+  const secret = env.JWT_SECRET
+  const secretKey = createSecretKey(secret, 'utf-8')
+  const { payload } = await jwtVerify<JwtPayload>(token, secretKey)
+  return {
+    id: payload.id,
+    email: payload.email,
+    username: payload.username,
+  }
 }
