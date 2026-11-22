@@ -1,5 +1,7 @@
 import bcrypt from 'bcrypt'
 import env from '../../env.ts'
+import type { Request } from 'express'
+import type { User } from '../db/schema.ts'
 
 /**
  * Hashes a password so it's safe to store.
@@ -13,4 +15,11 @@ import env from '../../env.ts'
  */
 export const hashPassword = async (password: string): Promise<string> => {
   return await bcrypt.hash(password, env.BCRYPT_ROUNDS)
+}
+
+export async function comparePassword(
+  password: string,
+  hashedPassword: string,
+) {
+  return await bcrypt.compare(password, hashedPassword)
 }

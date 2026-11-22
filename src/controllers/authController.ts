@@ -1,8 +1,10 @@
 import type { Request, Response } from 'express'
 import { type NewUser, type User, users } from '../db/schema.ts'
-import { hashPassword } from '../utils/passwords.ts'
+import { hashPassword, comparePassword } from '../utils/passwords.ts'
 import { db } from '../db/connection.ts'
 import { generateToken } from '../utils/jwt.ts'
+import { eq } from 'drizzle-orm'
+import bcrypt from 'bcrypt'
 /**
  * POST handler: creates a user and logs them in straight away.
  *
@@ -45,5 +47,53 @@ export const register = async (
   } catch (e) {
     console.error('Registration error', e)
     res.status(500).json({ message: 'Failed to create user' })
+  }
+}
+
+export const login = async (
+  req: Request<any, any, { email: string; password: string }>,
+  res: Response,
+) => {
+  try {
+    // find user by email in the db
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, req.body.email))
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' })
+    }
+    //compare provided password with stored hash
+    const isValidatedPassword = await comparePassword(
+      req.body.password,
+      user.password,
+    )
+    if (!isValidatedPassword) {
+      return res.status(401).json({ message: 'Invalid credentials' })
+    }
+
+    //If valid, generate JWT token
+    const token = await generateToken({
+      username: user.username,
+      id: user.id,
+      email: user.email,
+    })
+
+    //Return token for future requests
+    res.status(200).json({
+      message: 'Login Successful',
+      user: {
+        id: user.id,
+        email: user.email,
+        userName: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        createdAt: user.createdAt,
+      },
+      token,
+    })
+  } catch (error) {
+    console.error('Login error:', error)
+    res.status(500).json({ message: 'Sign in failed ', error })
   }
 }
