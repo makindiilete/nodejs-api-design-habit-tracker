@@ -176,6 +176,8 @@ export const habitTagsRelationships = relations(habitTags, ({ one }) => ({
 
 /** A row from `users`. Includes `password` (the hash): never send it in an API response. */
 export type User = typeof users.$inferSelect
+/** Shape for inserting into `users`; DB-defaulted columns (id, timestamps) are optional. */
+export type NewUser = typeof users.$inferInsert
 /** A row from `habits`. */
 export type Habit = typeof habits.$inferSelect
 /** A row from `entries` (one completion of a habit). */
