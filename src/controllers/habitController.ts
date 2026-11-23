@@ -16,7 +16,7 @@ import { eq } from 'drizzle-orm'
  * @param {Response} res - Express response object.
  * @returns {Promise<void>} Sends 201 `{ message, habit }`, or 500 `{ message }` on failure.
  */
-export const createHabit = async (
+export const createHabitBasic = async (
   req: AuthenticatedRequest,
   res: Response,
 ): Promise<void> => {
@@ -40,6 +40,13 @@ export const createHabit = async (
   } catch (error) {
     console.log(error)
     res.status(500).json({ message: 'Failed to create habit' })
+  }
+}
+
+export const createHabitWithTags = () => {
+  try {
+  } catch (error) {
+    console.log(error)
   }
 }
 

@@ -3,7 +3,7 @@ import zod, { z } from 'zod'
 import { validateBody, validateParams } from '../middleware/validation.ts'
 import { authenticateToken } from '../middleware/auth.ts'
 import { insertHabitSchema } from '../db/schema.ts'
-import { createHabit, getHabits } from '../controllers/habitController.ts'
+import { createHabitBasic, getHabits } from '../controllers/habitController.ts'
 
 /** Router for `/api/habits`. Every route below needs a logged-in user. */
 const router = Router()
@@ -36,7 +36,7 @@ router.get('/:id', (req, res) => {
 })
 
 /** POST /api/habits — validate the body with `insertHabitSchema`, then create the habit. */
-router.post('/', validateBody(insertHabitSchema), createHabit)
+router.post('/', validateBody(insertHabitSchema), createHabitBasic)
 
 router.delete('/:id', (req, res) => {
   res.status(204).send({ message: 'Deleted an habit' })
