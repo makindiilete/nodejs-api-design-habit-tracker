@@ -10,6 +10,7 @@ import {
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import { z } from 'zod'
 
 /*
  * HOW TO READ THIS FILE
@@ -201,8 +202,34 @@ export const insertUserSchema = createInsertSchema(users)
 /** Shape of a full user row. Omit `password` before using it for responses. */
 export const selectUserSchema = createSelectSchema(users)
 
-/** Validates a new habit (e.g. POST /habits body). `userId` is required: set it from the logged-in user, not the client. */
-export const insertHabitSchema = createInsertSchema(habits)
+/**
+ * Validates a new habit from the client (e.g. POST /habits body).
+ * - `name`: at least 1 character.
+ * - `frequency`: 'daily' or 'weekly'; lowercased first, so 'Daily' is accepted.
+ * - `targetCount`: at least 1.
+ * - `id`, `userId`, `createdAt`, `updatedAt` are omitted: the client cannot send them.
+ *   Set `userId` on the server from the logged-in user (req.user.id).
+ */
+export const insertHabitSchema = createInsertSchema(habits, {
+  name: (s) => s.min(1),
+  /*
+   * z.preprocess(fn, schema) runs `fn` on the raw input BEFORE `schema` checks it.
+   * Step 1: if the value is a string, lowercase it ('DAILY' → 'daily'); anything else passes through as-is.
+   * Step 2: z.enum checks the result is exactly 'daily' or 'weekly'.
+   * The lowercased value is what ends up in the parsed data and gets saved to the DB.
+   * Non-strings (e.g. 5, null) are not changed, so z.enum rejects them with a normal validation error.
+   */
+  frequency: z.preprocess(
+    (val) => (typeof val === 'string' ? val.toLowerCase() : val),
+    z.enum(['daily', 'weekly']),
+  ),
+  targetCount: (s) => s.min(1),
+}).omit({
+  createdAt: true,
+  userId: true,
+  id: true,
+  updatedAt: true,
+})
 /** Shape of a full habit row. */
 export const selectHabitSchema = createSelectSchema(habits)
 
