@@ -3,7 +3,7 @@ import zod, { z } from 'zod'
 import { validateBody, validateParams } from '../middleware/validation.ts'
 import { authenticateToken } from '../middleware/auth.ts'
 import { insertHabitSchema } from '../db/schema.ts'
-import { createHabit } from '../controllers/habitController.ts'
+import { createHabit, getHabits } from '../controllers/habitController.ts'
 
 /** Router for `/api/habits`. Every route below needs a logged-in user. */
 const router = Router()
@@ -28,9 +28,7 @@ const completeHabitParamsSchema = z.object({
   id: z.string().max(3), //id 1212 will fail because the characters cannot be more than 3
 })
 
-router.get('/', (req, res) => {
-  res.json({ message: 'Habits' })
-})
+router.get('/', getHabits)
 
 router.get('/:id', (req, res) => {
   res.send({ message: 'Got one habit' })
