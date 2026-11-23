@@ -211,6 +211,8 @@ export const selectUserSchema = createSelectSchema(users)
  *   Set `userId` on the server from the logged-in user (req.user.id).
  */
 export const insertHabitSchema = createInsertSchema(habits, {
+  // `(s) => ...` REFINES the generated schema (keeps varchar(200), NOT NULL) and adds a rule.
+  // A plain value (like `frequency` below) REPLACES the generated schema entirely.
   name: (s) => s.min(1),
   /*
    * z.preprocess(fn, schema) runs `fn` on the raw input BEFORE `schema` checks it.
