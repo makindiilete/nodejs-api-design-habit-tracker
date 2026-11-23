@@ -16,7 +16,10 @@ import { eq } from 'drizzle-orm'
  * @param {Response} res - Express response object.
  * @returns {Promise<void>} Sends 201 `{ message, habit }`, or 500 `{ message }` on failure.
  */
-export const createHabit = async (req: AuthenticatedRequest, res: Response) => {
+export const createHabit = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
   try {
     const [habit] = await db
       .insert(habits)

@@ -21,5 +21,7 @@ Notes from the API Design in Node.js course, written to be interview-ready.
 | 15 | [Connection Pooling: Mongoose vs Postgres](./15-connection-pooling.md) |
 | 16 | [Cookies & Session-Based Authentication](./16-cookies-and-sessions.md) |
 | 17 | [Anatomy of a bcrypt Password Hash](./17-bcrypt-password-hashes.md) |
+| 18 | [How to Write a Multi-Table Route](./18-writing-a-multi-table-route.md) |
+| 19 | [Understanding Tables and Their Relationships](./19-understanding-tables-and-relationships.md) |
 
 New notes go in this folder as `NN-topic-name.md`, and get a row in the table above.

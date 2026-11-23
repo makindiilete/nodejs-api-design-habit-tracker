@@ -207,8 +207,17 @@ export const selectUserSchema = createSelectSchema(users)
  * - `name`: at least 1 character.
  * - `frequency`: 'daily' or 'weekly'; lowercased first, so 'Daily' is accepted.
  * - `targetCount`: at least 1.
- * - `id`, `userId`, `createdAt`, `updatedAt` are omitted: the client cannot send them.
+ * - `.omit({...})` — removes `id`, `userId`, `createdAt`, `updatedAt`: the client cannot send them.
  *   Set `userId` on the server from the logged-in user (req.user.id).
+ * - `.extend({ tagIds })` — lets the client attach tags in the same request that creates the habit.
+ *   Why it's needed: `habits` has NO tag column. Habits and tags are many-to-many, linked only
+ *   through the `habits_tags` join table (`habit_id` + `tag_id`, one row per habit–tag pair).
+ *   So tags can't go into the `habits` insert. The client sends the chosen tags' ids as `tagIds`
+ *   (e.g. ['<uuid of "Health">', '<uuid of "Morning">']), and `createHabit` inserts the habit
+ *   first, then one `habits_tags` row per id, inside one transaction.
+ *   `tagIds` must be added here because it isn't a `habits` column: `validateBody` replaces
+ *   `req.body` with the parsed result, and Zod silently drops keys the schema doesn't know.
+ *   `z.array(z.uuid()).optional()`: a habit can be created with no tags. See docs/18 and docs/19.
  */
 export const insertHabitSchema = createInsertSchema(habits, {
   // `(s) => ...` REFINES the generated schema (keeps varchar(200), NOT NULL) and adds a rule.
@@ -226,12 +235,16 @@ export const insertHabitSchema = createInsertSchema(habits, {
     z.enum(['daily', 'weekly']),
   ),
   targetCount: (s) => s.min(1),
-}).omit({
-  createdAt: true,
-  userId: true,
-  id: true,
-  updatedAt: true,
 })
+  .omit({
+    createdAt: true,
+    userId: true,
+    id: true,
+    updatedAt: true,
+  })
+  .extend({
+    tagIds: z.array(z.uuid()).optional(),
+  })
 /** Shape of a full habit row. */
 export const selectHabitSchema = createSelectSchema(habits)
 
