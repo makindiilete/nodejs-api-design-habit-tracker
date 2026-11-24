@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express'
 import { db } from '../db/connection.ts'
-import { habits } from '../db/schema.ts'
+import { habits, habitTags, tags } from '../db/schema.ts'
 import type { AuthenticatedRequest } from '../middleware/auth.ts'
 import { eq } from 'drizzle-orm'
 
@@ -43,10 +43,59 @@ export const createHabitBasic = async (
   }
 }
 
-export const createHabitWithTags = () => {
+export const createHabitWithTags = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
   try {
+    const { name, description, frequency, targetCount, isActive, tagIds } =
+      req.body
+    // check for invalid tags first and return
+    if (tagIds && tagIds.length > 0) {
+      console.log({ tagIds })
+      tagIds.map(async (t: string) => {
+        const [tagsFromDb] = await db.select().from(tags).where(eq(tags.id, t))
+        console.log({ tagsFromDb })
+        if (!tagsFromDb) {
+          return res.status(400).json({ message: 'Invalid tag' })
+        }
+      })
+    }
+    //Transaction to insert habits with valid tags.. Tags that gets here are valid
+    const result = await db.transaction(async (tx) => {
+      //first insert habit
+      const [createdHabit] = await tx
+        .insert(habits)
+        .values({
+          name,
+          description,
+          frequency,
+          targetCount,
+          isActive,
+          userId: req.user!.id,
+        })
+        .returning()
+      console.log({ createdHabit })
+      // map the valid tags and use them to insert into habitTags table
+      tagIds.map(async (t: string) => {
+        await tx.insert(habitTags).values({
+          habitId: createdHabit.id,
+          tagId: t,
+        })
+        console.log({ createdHabit })
+        return createdHabit
+      })
+    })
+    console.log({ newHabit: result })
+    res
+      .status(201)
+      .json({
+        message: 'Habit with tag(s) created successfully',
+        newHabit: result,
+      })
   } catch (error) {
-    console.log(error)
+    console.log('Server error creating habit with tags ', error)
+    res.status(500).json({ message: 'Something went wrong, please try again' })
   }
 }
 
