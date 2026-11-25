@@ -7,6 +7,7 @@ import {
   createHabitBasic,
   createHabitWithTags,
   getHabits,
+  getHabitsWithTags,
 } from '../controllers/habitController.ts'
 
 /** Router for `/api/habits`. Every route below needs a logged-in user. */
@@ -32,8 +33,8 @@ const completeHabitParamsSchema = z.object({
   id: z.string().max(3), //id 1212 will fail because the characters cannot be more than 3
 })
 
-/** GET /api/habits — list the logged-in user's habits. */
-router.get('/', getHabits)
+/** GET /api/habits — list the logged-in user's habits (newest first), each with its tags. */
+router.get('/', getHabitsWithTags)
 
 router.get('/:id', (req, res) => {
   res.send({ message: 'Got one habit' })
