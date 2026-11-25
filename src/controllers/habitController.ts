@@ -55,7 +55,7 @@ export const createHabitBasic = async (
 /**
  * POST handler: creates a habit for the logged-in user and links it to existing tags.
  * Checks every tag id first, then saves the habit and its `habits_tags` rows in one transaction.
- * Full explanation: docs/20-async-map-and-get-habits-with-tags.md
+ * Full explanation: docs/20-async-map-in-create-habit-with-tags.md
  *
  * @param {AuthenticatedRequest} req - `req.user` set by `authenticateToken`; body checked by `validateBody`.
  * @param {Response} res - Express response object.
@@ -156,7 +156,7 @@ export const getHabits = async (
 
 /**
  * Turns a habit's `habits_tags` rows into a plain list of tags (keeps only each row's `tag`).
- * Sample input and output: docs/20-async-map-and-get-habits-with-tags.md
+ * Sample input and output: docs/21-get-habits-with-tags.md
  *
  * @param {HabitTagWithTag[]} habitTags - One habit's link rows, each with its `tag` loaded.
  * @returns {Tag[]} The tags only, in the same order (`[]` when the habit has no tags).
@@ -167,7 +167,7 @@ const getTagsFromHabitTags = (habitTags: HabitTagWithTag[]): Tag[] => {
 
 /**
  * GET handler: lists the logged-in user's habits, newest first, each with its tags.
- * Full explanation: docs/20-async-map-and-get-habits-with-tags.md
+ * Full explanation: docs/21-get-habits-with-tags.md
  *
  * @param {AuthenticatedRequest} req - `req.user` set by `authenticateToken`.
  * @param {Response} res - Express response object.
