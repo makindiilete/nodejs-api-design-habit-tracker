@@ -7,6 +7,7 @@ import cors from 'cors'
 import morgan from 'morgan'
 import { isTest } from '../env.ts'
 import { authenticateToken } from './middleware/auth.ts'
+import { errorHandler } from './middleware/errorHandler.ts'
 
 export const app = express()
 
@@ -115,3 +116,9 @@ app.use('/api/auth', authRoutes)
 app.use(authenticateToken)
 app.use('/api/users', userRoutes)
 app.use('/api/habits', habitRoutes)
+
+// 404 handler - MUST come after all valid routes
+// app.use(notFound)
+
+// Global error handler - MUST be last
+app.use(errorHandler)
