@@ -65,10 +65,10 @@ router.post(
 )
 
 /**
- * PUT /api/habits/:id — check the id and the body, then update the habit (and replace its tags if `tagIds` is sent).
+ * PATCH /api/habits/:id — check the id and the body, then update the habit (and replace its tags if `tagIds` is sent).
  * Middleware runs left to right: a 400 from either validator stops the request before the controller.
  */
-router.put(
+router.patch(
   '/:id',
   validateParams(habitIdParamsSchema),
   validateBody(updateHabitSchema),
