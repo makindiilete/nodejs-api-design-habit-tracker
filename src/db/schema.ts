@@ -245,6 +245,25 @@ export const insertHabitSchema = createInsertSchema(habits, {
   .extend({
     tagIds: z.array(z.uuid()).optional(),
   })
+/**
+ * Validates the body of PUT /api/habits/:id (update a habit).
+ *
+ * - `.partial()` — makes every field optional, so the client sends only what changes
+ *   (e.g. just `{ "name": "Read 40 mins" }`). The rules still apply to fields that ARE sent.
+ * - Built from `insertHabitSchema`, so `id`, `userId`, `createdAt` and `updatedAt` are already
+ *   left out: Zod drops them, and a client can't move a habit to another user (IDOR).
+ * - `tagIds` (optional): when sent, REPLACES all the habit's tags. `[]` removes every tag.
+ *   Left out → tags are not touched.
+ * - `.refine(...)` — rejects an empty body `{}` with a 400, since there would be nothing to update.
+ */
+export const updateHabitSchema = insertHabitSchema
+  .partial()
+  .refine((body) => Object.keys(body).length > 0, {
+    message: 'Send at least one field to update',
+  })
+/** Shape of a valid update body (what `req.body` holds after `validateBody(updateHabitSchema)`). */
+export type UpdateHabitBody = z.infer<typeof updateHabitSchema>
+
 /** Shape of a full habit row. */
 export const selectHabitSchema = createSelectSchema(habits)
 

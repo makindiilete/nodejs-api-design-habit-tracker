@@ -2,13 +2,15 @@ import { Router } from 'express'
 import zod, { z } from 'zod'
 import { validateBody, validateParams } from '../middleware/validation.ts'
 import { authenticateToken } from '../middleware/auth.ts'
-import { insertHabitSchema } from '../db/schema.ts'
+import { insertHabitSchema, updateHabitSchema } from '../db/schema.ts'
 import {
   createHabitBasic,
   createHabitWithTags,
   getHabits,
   getHabitsWithTags,
+  updateHabit,
 } from '../controllers/habitController.ts'
+import { updateHabitPrisma } from '../controllers/habitController.prisma.ts'
 
 /** Router for `/api/habits`. Every route below needs a logged-in user. */
 const router = Router()
@@ -33,6 +35,11 @@ const completeHabitParamsSchema = z.object({
   id: z.string().max(3), //id 1212 will fail because the characters cannot be more than 3
 })
 
+/** `:id` must be a UUID, so a bad id gets a 400 instead of a Postgres error (500). */
+const habitIdParamsSchema = z.object({
+  id: z.uuid(),
+})
+
 /** GET /api/habits — list the logged-in user's habits (newest first), each with its tags. */
 router.get('/', getHabitsWithTags)
 
@@ -55,6 +62,17 @@ router.post(
     const habitId = req.params.id
     res.status(201).send({ message: `Completed Habit ${habitId}` })
   },
+)
+
+/**
+ * PUT /api/habits/:id — check the id and the body, then update the habit (and replace its tags if `tagIds` is sent).
+ * Middleware runs left to right: a 400 from either validator stops the request before the controller.
+ */
+router.put(
+  '/:id',
+  validateParams(habitIdParamsSchema),
+  validateBody(updateHabitSchema),
+  updateHabitPrisma,
 )
 
 export default router
